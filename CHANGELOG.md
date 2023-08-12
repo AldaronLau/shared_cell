@@ -4,6 +4,10 @@ All notable changes to `shared_cell` will be documented in this file.
 The format is based on [Keep a Changelog], and this project adheres to
 [Semantic Versioning].
 
+## [0.1.1] - 2023-08-12
+### Fixed
+ - Mistakes in README
+
 ## [0.1.0] - 2023-08-12
 ### Added
  - `CellExt` extension trait

@@ -1,10 +1,10 @@
-# Local Cell
+# Shared Cell
 Interior mutability between concurrent tasks on the same thread.
 
 Alternative to [`pure_cell`](https://crates.io/crates/pure_cell)
 
 ## License
-Copyright © 2023 The Local Cell Contributors.
+Copyright © 2023 The Shared Cell Contributors.
 
 Licensed under any of
  - Apache License, Version 2.0, ([LICENSE\_APACHE] or

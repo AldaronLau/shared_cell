@@ -1,6 +1,6 @@
 [package]
 name = "shared_cell"
-version = "0.1.0"
+version = "0.1.1"
 license = "Apache-2.0 OR BSL-1.0 OR MIT"
 description = "Interior mutability between concurrent tasks on the same thread"
 repository = "https://github.com/AldaronLau/shared_cell"
