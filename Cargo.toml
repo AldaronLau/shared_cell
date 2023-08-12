@@ -1,0 +1,57 @@
+[package]
+name = "shared_cell"
+version = "0.1.0"
+license = "Apache-2.0 OR BSL-1.0 OR MIT"
+description = "Interior mutability between concurrent tasks on the same thread"
+repository = "https://github.com/AldaronLau/shared_cell"
+documentation = "https://docs.rs/shared_cell"
+homepage = "https://github.com/AldaronLau/shared_cell/blob/stable/CHANGELOG.md"
+include = [
+    "/README.md",
+    "/src/",
+    "/LICENSE_APACHE",
+    "/LICENSE_BOOST",
+    "/LICENSE_MIT",
+    "/examples/",
+]
+categories = [
+    "asynchronous",
+    "concurrency",
+    "no-std",
+    "no-std::no-alloc",
+    "rust-patterns",
+]
+keywords = ["cell", "interior", "mutability", "local", "async"]
+readme = "README.md"
+edition = "2021"
+
+[dependencies.traitful]
+version = "0.2"
+
+[dev-dependencies.async_main]
+version = "0.4"
+features = ["futures"]
+
+[dev-dependencies.futures]
+version = "0.3"
+
+[dev-dependencies.pasts]
+version = "0.14"
+
+[dev-dependencies.tokio]
+version = "1.30"
+features = ["macros", "rt"]
+
+[dev-dependencies.whisk]
+version = "0.12"
+
+[features]
+default = []
+alloc = []
+
+[[example]]
+name = "actor"
+required-features = ["alloc"]
+
+[package.metadata.docs.rs]
+features = ["alloc"]
