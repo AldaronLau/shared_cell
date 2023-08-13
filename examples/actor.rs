@@ -1,5 +1,4 @@
 use std::{
-    cell::Cell,
     future::Future,
     mem,
     thread::{self, JoinHandle},
@@ -10,7 +9,7 @@ use futures::{
     executor,
     future::{self, Either},
 };
-use shared_cell::{CellExt, TaskGroup};
+use shared_cell::{shared_cell, SharedCell, TaskGroup};
 use whisk::Channel;
 
 /// Actor using the futures crate
@@ -19,21 +18,21 @@ struct FuturesActor<'a, T> {
 }
 
 impl<'a, T> FuturesActor<'a, T> {
-    pub fn new(data: &'a mut T) -> Self {
+    pub fn new(shared_cell: &'a SharedCell<'a, T>) -> Self {
         Self {
-            task_group: TaskGroup::new(Cell::from_mut(data)),
+            task_group: TaskGroup::new(shared_cell),
         }
     }
 
-    pub fn spawn<F>(&mut self, f: impl FnOnce(&'a Cell<T>) -> F)
+    pub fn spawn<F>(&mut self, f: impl FnOnce(&'a SharedCell<T>) -> F)
     where
         F: Future<Output = ()> + 'a,
     {
         self.task_group.spawn(|cell| Box::pin(f(cell)));
     }
 
-    pub fn shared(&self) -> &'a Cell<T> {
-        self.task_group.shared()
+    pub fn shared_cell(&self) -> &'a SharedCell<T> {
+        self.task_group.shared_cell()
     }
 
     pub async fn next<R>(
@@ -98,9 +97,13 @@ impl Actor {
     /// Worker thread for this actor
     async fn worker(
         mut channel: Channel<Option<Channel<u32>>>,
-        mut counter: u32,
+        counter: u32,
     ) -> u32 {
-        let mut actor = FuturesActor::new(&mut counter);
+        let counter = counter;
+
+        shared_cell!(counter);
+
+        let mut actor = FuturesActor::new(counter);
 
         while let Some(oneshot) = actor.next(&mut channel).await {
             // Spawn a task
@@ -114,7 +117,7 @@ impl Actor {
             })
         }
 
-        actor.shared().with(|counter| *counter)
+        actor.shared_cell().with(|counter: &mut u32| *counter)
     }
 }
 

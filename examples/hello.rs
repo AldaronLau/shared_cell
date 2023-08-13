@@ -1,22 +1,21 @@
-use core::cell::Cell;
-
-use shared_cell::CellExt;
+use shared_cell::shared_cell;
 
 struct Context {
     stuff: u32,
 }
 
 fn main() {
-    let cell = Cell::new(Context { stuff: 42 });
+    let context = Context { stuff: 42 };
 
-    cell.with(|context| {
-        println!("Before: {}", context.stuff);
-        context.stuff += 1;
-        println!("After: {}", context.stuff);
+    shared_cell!(context);
+    context.with(|cx| {
+        println!("Before: {}", cx.stuff);
+        cx.stuff += 1;
+        println!("After: {}", cx.stuff);
 
         // Will not compile
-        /* cell.with(|context| {
-            context.stuff += 1;
+        /* context.with(|cx| {
+            cx.stuff += 1;
         }); */
     });
 }

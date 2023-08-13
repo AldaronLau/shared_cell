@@ -1,14 +1,13 @@
 #![forbid(unsafe_code)]
 
-use alloc::{boxed::Box, format, vec::Vec};
+use alloc::{boxed::Box, vec::Vec};
 use core::{
-    cell::Cell,
     fmt::{Debug, Formatter, Result},
     future::Future,
     pin::Pin,
 };
 
-use crate::CellExt;
+use crate::SharedCell;
 
 /// A set of tasks that run together on the same thread, with shared data.
 ///
@@ -22,8 +21,8 @@ use crate::CellExt;
 #[doc = include_str!("../examples/actor.rs")]
 /// ```
 pub struct TaskGroup<'a, T, F = Pin<Box<dyn Future<Output = ()> + 'a>>> {
-    shared: &'a Cell<T>,
-    set: Vec<F>,
+    shared_cell: &'a SharedCell<'a, T>,
+    tasks: Vec<F>,
 }
 
 impl<T, F> Debug for TaskGroup<'_, T, F>
@@ -31,12 +30,9 @@ where
     T: Debug,
 {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        let set_len = self.set.len();
-        let shared = self.shared.with(|shared| format!("{shared:?}"));
-
         f.debug_struct("TaskGroup")
-            .field("shared", &shared)
-            .field("set.len", &set_len)
+            .field("shared_cell", &self.shared_cell)
+            .field("tasks.len", &self.tasks.len())
             .finish_non_exhaustive()
     }
 }
@@ -46,15 +42,15 @@ where
     F: Future<Output = ()> + Unpin + 'a,
 {
     /// Create a new [`TaskGroup`].
-    pub fn new(shared: &'a Cell<T>) -> Self {
-        let set = Vec::new();
+    pub fn new(shared_cell: &'a SharedCell<'a, T>) -> Self {
+        let tasks = Vec::new();
 
-        Self { shared, set }
+        Self { shared_cell, tasks }
     }
 
     /// Spawn a task on the [`TaskGroup`].
-    pub fn spawn(&mut self, f: impl FnOnce(&'a Cell<T>) -> F) {
-        self.set.push(f(self.shared));
+    pub fn spawn(&mut self, f: impl FnOnce(&'a SharedCell<'a, T>) -> F) {
+        self.tasks.push(f(self.shared_cell));
     }
 
     /// Get a mutable reference to the set of tasks.
@@ -62,11 +58,11 @@ where
     /// It is up to the library user how to use the list to select and `.await`
     /// from the set of tasks.
     pub fn tasks(&mut self) -> &mut Vec<F> {
-        &mut self.set
+        &mut self.tasks
     }
 
     /// Get the shared cell.
-    pub fn shared(&self) -> &'a Cell<T> {
-        self.shared
+    pub fn shared_cell(&self) -> &'a SharedCell<'a, T> {
+        self.shared_cell
     }
 }

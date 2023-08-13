@@ -4,6 +4,25 @@ All notable changes to `shared_cell` will be documented in this file.
 The format is based on [Keep a Changelog], and this project adheres to
 [Semantic Versioning].
 
+## [0.2.0] - 2023-08-12
+### Added
+ - `shared_cell!()` macro
+ - `SharedCell` type
+   - `new()` associated function
+   - `with()` method
+   - `with_unchecked()` method
+
+### Removed
+ - `CellExt` trait
+
+### Changed
+ - `TaskGroup::new()` now takes `&'a SharedCell<'a, T>`
+ - Renamed `TaskGroup::shared()` to `TaskGroup::shared_cell()`, and changed
+   return type to `&'a SharedCell<'a, T>`
+
+### Fixed
+ - Unsoundess issues brought up at <https://users.rust-lang.org/t/announcing-shared-cell-an-additional-cell-api-with-zero-cost-concurrent-data-sharing-in-single-threaded-asynchronous-code/98342>
+
 ## [0.1.1] - 2023-08-12 (Yanked)
 ### Fixed
  - Mistakes in README
