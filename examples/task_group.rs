@@ -6,15 +6,11 @@ async fn main(_: LocalSpawner) {
     let mut data = [1, 2, 3, 4];
     let mut task_group = TaskGroup::<'_, _>::new(&mut data);
 
-    task_group.spawn(|mut data| {
-        Box::pin(async move {
-            data.with(|data| data[0] = 5);
-        })
+    task_group.spawn(|mut data| async move {
+        data.with(|data| data[0] = 5);
     });
-    task_group.spawn(|mut data| {
-        Box::pin(async move {
-            data.with(|data| data[1] = 6);
-        })
+    task_group.spawn(|mut data| async move {
+        data.with(|data| data[1] = 6);
     });
 
     while !task_group.is_empty() {

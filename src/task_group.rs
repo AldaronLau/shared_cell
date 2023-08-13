@@ -37,6 +37,22 @@ where
     }
 }
 
+impl<'a, T> TaskGroup<'a, T>
+where
+    T: ?Sized,
+{
+    /// Spawn a task on the [`TaskGroup`].
+    pub fn spawn<A>(&mut self, f: impl FnOnce(SharedCell<'a, T>) -> A)
+    where
+        A: Future<Output = ()> + 'a,
+    {
+        // SAFETY: SharedCell is only ever exposed from within the closure,
+        // meaning it can't be captured from the outside environment.
+        self.tasks
+            .push(Box::pin(f(unsafe { self.shared_cell.duplicate() })));
+    }
+}
+
 impl<'a, T, F> TaskGroup<'a, T, F>
 where
     F: Future<Output = ()> + Unpin + 'a,
@@ -48,13 +64,6 @@ where
         let tasks = Vec::new();
 
         Self { shared_cell, tasks }
-    }
-
-    /// Spawn a task on the [`TaskGroup`].
-    pub fn spawn(&mut self, f: impl FnOnce(SharedCell<'a, T>) -> F) {
-        // SAFETY: SharedCell is only ever exposed from within the closure,
-        // meaning it can't be captured from the outside environment.
-        self.tasks.push(f(unsafe { self.shared_cell.duplicate() }));
     }
 
     /// Advance the execution of tasks within the task group.
