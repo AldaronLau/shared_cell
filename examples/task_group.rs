@@ -21,7 +21,10 @@ async fn main(_: LocalSpawner) {
         task_group.advance().await;
     }
 
-    let data = task_group.into_shared_cell().unwrap().with(|data| data.clone());
+    let data = task_group
+        .into_shared_cell()
+        .unwrap()
+        .with(|data| data.clone());
 
     println!("{data:?}");
 

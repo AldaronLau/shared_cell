@@ -17,14 +17,17 @@ use crate::SharedCell;
 /// ```rust
 #[doc = include_str!("../examples/task_group.rs")]
 /// ```
-pub struct TaskGroup<'a, T, F = Pin<Box<dyn Future<Output = ()> + 'a>>> {
+pub struct TaskGroup<'a, T, F = Pin<Box<dyn Future<Output = ()> + 'a>>>
+where
+    T: ?Sized,
+{
     tasks: Vec<F>,
     shared_cell: SharedCell<'a, T>,
 }
 
 impl<T, F> Debug for TaskGroup<'_, T, F>
 where
-    T: Debug,
+    T: Debug + ?Sized,
 {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         f.debug_struct("TaskGroup")
@@ -37,6 +40,7 @@ where
 impl<'a, T, F> TaskGroup<'a, T, F>
 where
     F: Future<Output = ()> + Unpin + 'a,
+    T: ?Sized,
 {
     /// Create a new [`TaskGroup`].
     pub fn new(value: &'a mut T) -> Self {
@@ -76,10 +80,11 @@ where
 struct Tasks<'a, F>(&'a mut Vec<F>);
 
 impl<F> Future for Tasks<'_, F>
-where F: Future<Output = ()> + Unpin
+where
+    F: Future<Output = ()> + Unpin,
 {
     type Output = ();
-        
+
     fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<()> {
         let this = self.get_mut();
         let len = this.0.len();
@@ -89,7 +94,7 @@ where F: Future<Output = ()> + Unpin
             if let Poll::Ready(output) = Pin::new(&mut this.0[task]).poll(cx) {
                 this.0.swap_remove(task);
 
-                return Poll::Ready(output)
+                return Poll::Ready(output);
             }
         }
 

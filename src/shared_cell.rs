@@ -12,14 +12,15 @@ use core::{
 /// ```
 pub struct SharedCell<'a, T: ?Sized>(&'a Cell<T>);
 
-impl<T> Debug for SharedCell<'_, T> {
+impl<T: ?Sized> Debug for SharedCell<'_, T> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        f.debug_tuple("SharedCell").field(&format_args!("_"))
+        f.debug_tuple("SharedCell")
+            .field(&format_args!("_"))
             .finish()
     }
 }
 
-impl<'a, T> SharedCell<'a, T> {
+impl<'a, T: ?Sized> SharedCell<'a, T> {
     /// Create a new [`SharedCell`]
     pub fn new(value: &'a mut T) -> Self {
         Self(Cell::from_mut(value))

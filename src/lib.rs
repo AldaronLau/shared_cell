@@ -8,7 +8,7 @@
 //! greater guarantees in the asynchronous context (prevents holding onto the
 //! mutable reference over an `.await` point that yields to other tasks that
 //! have access to the [`SharedCell`]).
-//! 
+//!
 //! [`LocalKey::with()`]: https://doc.rust-lang.org/std/thread/struct.LocalKey.html#method.with
 
 #![doc(
