@@ -5,8 +5,16 @@ The format is based on [Keep a Changelog], and this project adheres to
 [Semantic Versioning].
 
 ## [0.4.0] - Unreleased
+### Added
+ - `TaskGroup::finish()` method
+ - `TaskGroup::cancel()` method
+
 ### Changed
- - `TaskGroup::advance()` method now implements very simple "fairness"
+ - `TaskGroup::advance()` method now implements very basic "fairness"
+
+### Removed
+ - `TaskGroup::into_inner()` method; Use `TaskGroup::finish()` or
+   `TaskGroup::cancel()` instead
 
 ## [0.3.0] - 2023-08-17
 ### Added

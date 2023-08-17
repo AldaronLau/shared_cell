@@ -1,6 +1,6 @@
 use alloc::{boxed::Box, vec::Vec};
 use core::{
-    fmt::{Debug, Formatter, Result as FmtResult},
+    fmt::{Debug, Formatter, Result},
     future::Future,
     pin::Pin,
     task::{Context, Poll},
@@ -69,7 +69,7 @@ impl<T> Debug for TaskGroup<'_, T>
 where
     T: Debug + ?Sized,
 {
-    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         f.debug_struct("TaskGroup")
             .field("shared_cell", &self.shared_cell)
             .field("tasks.len", &self.tasks.len())
@@ -90,23 +90,36 @@ where
     }
 
     /// Advance the execution of tasks within the task group.
+    ///
+    /// This method attempts minimum-effort fairness, and the future returned is
+    /// safe to cancel.  The priorities of subtasks will be reset upon
+    /// cancelation or completion of the future.  Completion may alter the
+    /// priorities of the remaining subtasks.
     pub async fn advance(&mut self) {
         Tasks(self, 0).await
     }
 
-    /// Return true if no more tasks
+    /// Return true if the task group is currently empty (no running tasks).
     pub fn is_empty(&self) -> bool {
         self.tasks.is_empty()
     }
 
-    /// Attempt to convert back into inner mutable reference.
-    pub fn into_inner(self) -> Result<&'a mut T, Self> {
-        if self.is_empty() {
-            // SAFETY: There are no duplicated instances of `SharedCell`
-            Ok(unsafe { self.shared_cell.into_inner() })
-        } else {
-            Err(self)
+    /// Cancel all subtasks, returning the inner value.
+    pub async fn cancel(mut self) -> &'a mut T {
+        self.tasks.clear();
+
+        // SAFETY: There are no more duplicated instances of `SharedCell`
+        unsafe { self.shared_cell.into_inner() }
+    }
+
+    /// Advance all subtasks until completion, returning the inner value.
+    pub async fn finish(mut self) -> &'a mut T {
+        while !self.is_empty() {
+            self.advance().await;
         }
+
+        // SAFETY: There are no more duplicated instances of `SharedCell`
+        unsafe { self.shared_cell.into_inner() }
     }
 
     /// Spawn a task on the [`TaskGroup`].

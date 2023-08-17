@@ -21,12 +21,8 @@ async fn main(_: LocalSpawner) {
     shared_cell::spawn!(task_group, five());
     shared_cell::spawn!(task_group, six());
 
-    while !task_group.is_empty() {
-        task_group.advance().await;
-    }
-
-    // Release borrow on `data`
-    drop(task_group);
+    // Wait for subtasks to complete, and release borrow on `data`
+    task_group.finish().await;
 
     println!("{data:?}");
 

@@ -85,9 +85,7 @@ impl Actor {
             }
         }
 
-        while !tasks.is_empty() {
-            tasks.advance().await;
-        }
+        tasks.finish().await;
 
         println!("Worker task is going down!");
     }
