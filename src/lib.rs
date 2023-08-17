@@ -38,4 +38,7 @@ extern crate alloc;
 mod shared_cell;
 mod task_group;
 
-pub use self::{shared_cell::SharedCell, task_group::TaskGroup};
+pub use self::{
+    shared_cell::{Shared, SharedCell},
+    task_group::TaskGroup,
+};

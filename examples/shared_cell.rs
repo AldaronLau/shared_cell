@@ -10,7 +10,7 @@ fn main() {
     let mut context = Context { stuff: 42 };
     let mut context = pin!(SharedCell::new(&mut context));
 
-    context.as_mut().with(|cx| {
+    context.with(|cx| {
         println!("Before: {}", cx.stuff);
         cx.stuff += 1;
         println!("After: {}", cx.stuff);

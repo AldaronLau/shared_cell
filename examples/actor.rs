@@ -1,8 +1,8 @@
-use std::pin::{pin, Pin};
+use std::pin::pin;
 
 use async_main::{async_main, LocalSpawner, Spawn};
 use futures::future;
-use shared_cell::{SharedCell, TaskGroup};
+use shared_cell::{Shared, TaskGroup};
 use whisk::Channel;
 
 enum Command {
@@ -53,7 +53,7 @@ impl Actor {
     }
 
     async fn next(
-        tasks: &mut TaskGroup<'_, Context>,
+        tasks: &mut TaskGroup<'_, Context, ()>,
         channel: &mut Channel<Option<Command>>,
     ) -> Option<Command> {
         loop {
@@ -92,11 +92,11 @@ impl Actor {
 }
 
 async fn increment(
-    mut cx: Pin<&mut SharedCell<'_, Context>>,
+    cx: &mut Shared<'_, Context>,
     x: u32,
     oneshot: Channel<u32>,
 ) {
-    let counter = cx.as_mut().with(|cx| {
+    let counter = cx.with(|cx| {
         cx.counter += x;
         cx.counter
     });
@@ -104,11 +104,8 @@ async fn increment(
     oneshot.send(counter).await;
 }
 
-async fn double(
-    mut cx: Pin<&mut SharedCell<'_, Context>>,
-    oneshot: Channel<u32>,
-) {
-    let counter = cx.as_mut().with(|cx| {
+async fn double(cx: &mut Shared<'_, Context>, oneshot: Channel<u32>) {
+    let counter = cx.with(|cx| {
         cx.counter *= 2;
         cx.counter
     });

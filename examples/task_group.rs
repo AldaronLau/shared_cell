@@ -1,21 +1,21 @@
-use std::{future, pin::Pin};
+use std::future;
 
 use async_main::{async_main, LocalSpawner};
-use shared_cell::{SharedCell, TaskGroup};
+use shared_cell::{Shared, TaskGroup};
 
 #[async_main]
 async fn main(_: LocalSpawner) {
     let mut data = [1, 2, 3, 4];
-    let mut task_group = TaskGroup::<'_, _>::new(&mut data);
+    let mut task_group = TaskGroup::new(&mut data);
 
-    async fn five(mut data: Pin<&mut SharedCell<'_, [u32; 4]>>) {
-        data.as_mut().with(|data| data[0] = 5);
+    async fn five(data: &mut Shared<'_, [u32; 4]>) {
+        data.with(|data| data[0] = 5);
     }
 
-    async fn six(mut data: Pin<&mut SharedCell<'_, [u32; 4]>>) {
+    async fn six(data: &mut Shared<'_, [u32; 4]>) {
         future::ready(()).await;
 
-        data.as_mut().with(|data| data[1] = 6);
+        data.with(|data| data[1] = 6);
     }
 
     shared_cell::spawn!(task_group, five());

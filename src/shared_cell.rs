@@ -5,6 +5,9 @@ use core::{
     pin::Pin,
 };
 
+/// Type alias for pinned [`SharedCell`]
+pub type Shared<'a, T> = Pin<&'a mut SharedCell<'a, T>>;
+
 /// Shared cell type
 ///
 /// # Example
@@ -42,7 +45,10 @@ impl<'a, T: ?Sized> SharedCell<'a, T> {
     }
 
     /// Acquire a mutable reference to the cell's interior value.
-    pub fn with<R>(self: Pin<&mut Self>, f: impl FnOnce(&mut T) -> R) -> R {
+    pub fn with<R>(
+        self: &mut Pin<&mut Self>,
+        f: impl FnOnce(&mut T) -> R,
+    ) -> R {
         // SAFETY: By isolating the `SharedCell` to one instance per scope, we
         // prevent reëntrant calls to `with()`.
         //

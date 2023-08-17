@@ -4,13 +4,17 @@ All notable changes to `shared_cell` will be documented in this file.
 The format is based on [Keep a Changelog], and this project adheres to
 [Semantic Versioning].
 
-## [0.4.0] - Unreleased
+## [0.4.0] - 2023-08-17
 ### Added
  - `TaskGroup::finish()` method
  - `TaskGroup::cancel()` method
+ - `Shared` type alias
 
 ### Changed
  - `TaskGroup::advance()` method now implements very basic "fairness"
+ - `TaskGroup` has an additional generic parameter for the return type of a
+   task.  This is now returned by `TaskGroup::advance()`
+ - `SharedCell::with()` now takes a mutable reference
 
 ### Removed
  - `TaskGroup::into_inner()` method; Use `TaskGroup::finish()` or

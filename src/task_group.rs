@@ -18,31 +18,31 @@ use crate::SharedCell;
 #[macro_export]
 macro_rules! spawn {
     ($tasks: expr, $callback: ident ( $($args: expr),+ $(,)? ) $(,)?) => {{
-        let tasks: &mut $crate::TaskGroup<'_, _> = &mut $tasks;
+        let tasks: &mut $crate::TaskGroup<'_, _, _> = &mut $tasks;
 
         let cb = $callback;
 
         // SAFETY: The `SharedCell` can't move, as it is pinned
         unsafe {
             tasks.spawn(|data| async move {
-                let data = core::pin::pin!(data);
+                let mut data = core::pin::pin!(data);
 
-                cb(data, $($args),+).await
+                cb(&mut data, $($args),+).await
             });
         }
     }};
 
     ($tasks: expr, $callback: ident ( ) $(,)?) => {{
-        let tasks: &mut $crate::TaskGroup<'_, _> = &mut $tasks;
+        let tasks: &mut $crate::TaskGroup<'_, _, _> = &mut $tasks;
 
         let cb = $callback;
 
         // SAFETY: The `SharedCell` can't move, as it is pinned
         unsafe {
             tasks.spawn(|data| async move {
-                let data = core::pin::pin!(data);
+                let mut data = core::pin::pin!(data);
 
-                cb(data).await
+                cb(&mut data).await
             });
         }
     }};
@@ -50,22 +50,23 @@ macro_rules! spawn {
 
 /// A set of tasks that run together on the same thread, with shared data.
 ///
-/// Can be used as a building block for concurrent actors.
+/// Can be used as a building block for concurrent actors, or to share data
+/// between multiple tasks without a mutex or borrow-checking.
 ///
 /// # Example
 ///
 /// ```rust
 #[doc = include_str!("../examples/task_group.rs")]
 /// ```
-pub struct TaskGroup<'a, T>
+pub struct TaskGroup<'a, T, R>
 where
     T: ?Sized,
 {
-    tasks: Vec<Pin<Box<dyn Future<Output = ()> + 'a>>>,
+    tasks: Vec<Pin<Box<dyn Future<Output = R> + 'a>>>,
     shared_cell: SharedCell<'a, T>,
 }
 
-impl<T> Debug for TaskGroup<'_, T>
+impl<T, R> Debug for TaskGroup<'_, T, R>
 where
     T: Debug + ?Sized,
 {
@@ -77,7 +78,7 @@ where
     }
 }
 
-impl<'a, T> TaskGroup<'a, T>
+impl<'a, T, R> TaskGroup<'a, T, R>
 where
     T: ?Sized,
 {
@@ -91,11 +92,13 @@ where
 
     /// Advance the execution of tasks within the task group.
     ///
+    /// Returns the output of the first task to complete.
+    ///
     /// This method attempts minimum-effort fairness, and the future returned is
     /// safe to cancel.  The priorities of subtasks will be reset upon
     /// cancelation or completion of the future.  Completion may alter the
     /// priorities of the remaining subtasks.
-    pub async fn advance(&mut self) {
+    pub async fn advance(&mut self) -> R {
         Tasks(self, 0).await
     }
 
@@ -115,7 +118,7 @@ where
     /// Advance all subtasks until completion, returning the inner value.
     pub async fn finish(mut self) -> &'a mut T {
         while !self.is_empty() {
-            self.advance().await;
+            drop(self.advance().await);
         }
 
         // SAFETY: There are no more duplicated instances of `SharedCell`
@@ -124,24 +127,26 @@ where
 
     /// Spawn a task on the [`TaskGroup`].
     ///
+    /// For a safe spawning API, see the [`spawn!()`] macro.
+    ///
     /// # Safety
     ///
     ///  - The `SharedCell` must never move outside of the closure.
     pub unsafe fn spawn<A>(&mut self, f: impl FnOnce(SharedCell<'a, T>) -> A)
     where
-        A: Future<Output = ()> + 'a,
+        A: Future<Output = R> + 'a,
     {
         self.tasks
             .push(Box::pin(f(unsafe { self.shared_cell.duplicate() })));
     }
 }
 
-struct Tasks<'a, 'b, T: ?Sized>(&'b mut TaskGroup<'a, T>, usize);
+struct Tasks<'a, 'b, T: ?Sized, R>(&'b mut TaskGroup<'a, T, R>, usize);
 
-impl<T: ?Sized> Future for Tasks<'_, '_, T> {
-    type Output = ();
+impl<T: ?Sized, R> Future for Tasks<'_, '_, T, R> {
+    type Output = R;
 
-    fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<()> {
+    fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<R> {
         let this = self.get_mut();
         let list = &mut this.0.tasks;
         let len = list.len();
