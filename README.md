@@ -1,7 +1,18 @@
 # Shared Cell
+
+<!--
+[![tests](https://github.com/AldaronLau/shared_cell/actions/workflows/ci.yml/badge.svg)](https://github.com/AldaronLau/shared_cell/actions/workflows/ci.yml)
+[![GitHub commit activity](https://img.shields.io/github/commit-activity/y/AldaronLau/shared_cell)](https://github.com/AldaronLau/shared_cell/)
+[![GitHub contributors](https://img.shields.io/github/contributors/AldaronLau/shared_cell)](https://github.com/AldaronLau/shared_cell/graphs/contributors)  -->
+[![Crates.io](https://img.shields.io/crates/v/shared_cell)](https://crates.io/crates/shared_cell)
+[![Crates.io](https://img.shields.io/crates/d/shared_cell)](https://crates.io/crates/shared_cell)
+[![Crates.io (recent)](https://img.shields.io/crates/dr/shared_cell)](https://crates.io/crates/shared_cell)  
+[![Crates.io](https://img.shields.io/crates/l/shared_cell)](https://github.com/AldaronLau/shared_cell/search?l=Text&q=license)
+[![Docs.rs](https://docs.rs/shared_cell/badge.svg)](https://docs.rs/shared_cell/)
+
 Interior mutability between concurrent tasks on the same thread.
 
-Alternative to [`pure_cell`](https://crates.io/crates/pure_cell)
+Successor to [`pure_cell`](https://crates.io/crates/pure_cell)
 
 ## License
 Copyright © 2023 The Shared Cell Contributors.
