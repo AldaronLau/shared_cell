@@ -30,7 +30,7 @@ The format is based on [Keep a Changelog], and this project adheres to
 ### Fixed
  - More (hopefully all remaining) unsoundness corner-case issues
 
-## [0.2.0] - 2023-08-12
+## [0.2.0] - 2023-08-12 (Yanked)
 ### Added
  - `shared_cell!()` macro
  - `SharedCell` type
