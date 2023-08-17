@@ -4,6 +4,32 @@ All notable changes to `shared_cell` will be documented in this file.
 The format is based on [Keep a Changelog], and this project adheres to
 [Semantic Versioning].
 
+## [0.3.0] - 2023-08-17
+### Added
+ - `SharedCell::duplicate()` method
+ - `SharedCell::into_inner()` method
+ - `TaskGroup::advance()` method
+ - `TaskGroup::is_empty()` method
+ - `TaskGroup::into_inner()` method
+ - `shared_cell::spawn!()` macro
+
+### Changed
+ - Made `SharedCell::new()` safe
+ - `SharedCell::with()` now takes a pinned mutable reference
+ - `SharedCell` is now `!Send` and `!Unpin`
+ - `TaskGroup::new()` now takes a mutable reference instead of a `SharedCell`
+ - `TaskGroup::spawn()` is now unsafe, and the closure now takes ownership of
+   the `SharedCell`
+
+### Removed
+ - `shared_cell!()` macro
+ - `SharedCell::with_unchecked()` method
+ - `TaskGroup::tasks()` method
+ - `TaskGroup::shared_cell()` method
+
+### Fixed
+ - More (hopefully all remaining) unsoundness corner-case issues
+
 ## [0.2.0] - 2023-08-12
 ### Added
  - `shared_cell!()` macro
