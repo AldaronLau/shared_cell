@@ -91,7 +91,7 @@ where
 
     /// Advance the execution of tasks within the task group.
     pub async fn advance(&mut self) {
-        Tasks(self).await
+        Tasks(self, 0).await
     }
 
     /// Return true if no more tasks
@@ -123,7 +123,7 @@ where
     }
 }
 
-struct Tasks<'a, 'b, T: ?Sized>(&'b mut TaskGroup<'a, T>);
+struct Tasks<'a, 'b, T: ?Sized>(&'b mut TaskGroup<'a, T>, usize);
 
 impl<T: ?Sized> Future for Tasks<'_, '_, T> {
     type Output = ();
@@ -132,7 +132,7 @@ impl<T: ?Sized> Future for Tasks<'_, '_, T> {
         let this = self.get_mut();
         let list = &mut this.0.tasks;
         let len = list.len();
-        let start = 0;
+        let start = this.1;
 
         for task in (start..len).chain(0..start) {
             if let Poll::Ready(output) = Pin::new(&mut list[task]).poll(cx) {
@@ -141,6 +141,9 @@ impl<T: ?Sized> Future for Tasks<'_, '_, T> {
                 return Poll::Ready(output);
             }
         }
+
+        // Cycle through priorities for "fairness" in long-running poll cycles
+        this.1 = if len == 0 { 0 } else { (this.1 + 1) % len };
 
         Poll::Pending
     }

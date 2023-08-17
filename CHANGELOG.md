@@ -4,6 +4,10 @@ All notable changes to `shared_cell` will be documented in this file.
 The format is based on [Keep a Changelog], and this project adheres to
 [Semantic Versioning].
 
+## [0.4.0] - Unreleased
+### Changed
+ - `TaskGroup::advance()` method now implements very simple "fairness"
+
 ## [0.3.0] - 2023-08-17
 ### Added
  - `SharedCell::duplicate()` method
