@@ -45,6 +45,9 @@ impl<'a, T: ?Sized> SharedCell<'a, T> {
     ///  - The scope containing the duplicated [`SharedCell`] must not have the
     ///    ability to resume execution of an asynchronous task that holds onto
     ///    another [`SharedCell`].
+    ///  - The duplicated [`SharedCell`] must not be moved by value (includes
+    ///    calls to [`SharedCell::into_inner()`]), unless there is only one
+    ///    instance remaining.
     pub unsafe fn duplicate(&mut self) -> Self {
         Self(self.0, PhantomPinned)
     }
@@ -63,11 +66,7 @@ impl<'a, T: ?Sized> SharedCell<'a, T> {
     }
 
     /// Get a mutable reference to the internal data.
-    ///
-    /// # Safety
-    ///
-    ///  - There must be no duplicated instances of [`SharedCell`].
-    pub unsafe fn into_inner(self) -> &'a mut T {
-        &mut *self.0.as_ptr()
+    pub fn into_inner(self) -> &'a mut T {
+        unsafe { &mut *self.0.as_ptr() }
     }
 }

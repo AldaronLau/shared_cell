@@ -5,6 +5,11 @@ The format is based on [Keep a Changelog], and this project adheres to
 [Semantic Versioning].
 
 ## [0.5.0] - Unreleased
+### Changed
+ - Split out `compile_fail` example for `SharedCell` docs
+ - `SharedCell::into_inner()` is no longer unsafe (with additional invariant on
+   `SharedCell::duplicate()`)
+
 ### Fixed
  - Typo in `into_inner()` docs
 
