@@ -57,7 +57,7 @@ impl<'a, T: ?Sized> SharedCell<'a, T> {
         unsafe { f(&mut *self.0.as_ptr()) }
     }
 
-    /// Get a mutable refernce to the internal data.
+    /// Get a mutable reference to the internal data.
     ///
     /// # Safety
     ///

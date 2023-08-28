@@ -4,6 +4,10 @@ All notable changes to `shared_cell` will be documented in this file.
 The format is based on [Keep a Changelog], and this project adheres to
 [Semantic Versioning].
 
+## [0.5.0] - Unreleased
+### Fixed
+ - Typo in `into_inner()` docs
+
 ## [0.4.0] - 2023-08-17
 ### Added
  - `TaskGroup::finish()` method
