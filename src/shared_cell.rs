@@ -61,11 +61,11 @@ impl<'a, T: ?Sized> SharedCell<'a, T> {
         // prevent reëntrant calls to `with()`.
         //
         // SAFETY: Cannot yield to code that could call `with()` due to safety
-        // invariant on `duplicate()`
+        // invariant on `duplicate()`.
         unsafe { f(&mut *self.0.as_ptr()) }
     }
 
-    /// Get a mutable reference to the internal data.
+    /// Return a mutable reference to the internal data.
     pub fn into_inner(self) -> &'a mut T {
         unsafe { &mut *self.0.as_ptr() }
     }
