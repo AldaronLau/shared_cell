@@ -12,8 +12,13 @@ pub type Shared<'a, T> = Pin<&'a mut SharedCell<'a, T>>;
 ///
 /// # Example
 ///
-/// ```
+/// ```rust
 #[doc = include_str!("../examples/shared_cell.rs")]
+/// ```
+/// 
+/// The code will not compile if you try to get two mutable references:
+/// ```rust,compile_fail
+#[doc = include_str!("../examples/should_fail/shared_cell.rs")]
 /// ```
 pub struct SharedCell<'a, T: ?Sized>(&'a Cell<T>, PhantomPinned);
 

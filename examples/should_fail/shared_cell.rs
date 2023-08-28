@@ -14,6 +14,13 @@ fn main() {
         println!("Before: {}", cx.stuff);
         cx.stuff += 1;
         println!("After: {}", cx.stuff);
+
+        // Doesn't compile
+        context.with(|cx| {
+            println!("Before: {}", cx.stuff);
+            cx.stuff += 1;
+            println!("After: {}", cx.stuff);
+        });
     });
 
     context.with(|cx| {
