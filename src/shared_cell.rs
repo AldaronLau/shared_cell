@@ -8,7 +8,7 @@ use core::{
 /// Type alias for pinned [`SharedCell`]
 pub type Shared<'a, T> = Pin<&'a mut SharedCell<'a, T>>;
 
-/// Shared cell type
+/// A cell that can be shared between async tasks running on the same thread
 ///
 /// # Example
 ///
@@ -31,12 +31,14 @@ impl<T: ?Sized> Debug for SharedCell<'_, T> {
 }
 
 impl<'a, T: ?Sized> SharedCell<'a, T> {
-    /// Create a new [`SharedCell`]
+    /// Create a new [`SharedCell`].
     pub fn new(value: &'a mut T) -> Self {
         Self(Cell::from_mut(value), PhantomPinned)
     }
 
     /// Duplicate the [`SharedCell`].
+    ///
+    /// For a safe abstraction, see [`TaskGroup`](crate::TaskGroup).
     ///
     /// # Safety
     ///
@@ -65,7 +67,7 @@ impl<'a, T: ?Sized> SharedCell<'a, T> {
         unsafe { f(&mut *self.0.as_ptr()) }
     }
 
-    /// Return a mutable reference to the internal data.
+    /// Return a mutable reference to the cell's interior value.
     pub fn into_inner(self) -> &'a mut T {
         unsafe { &mut *self.0.as_ptr() }
     }

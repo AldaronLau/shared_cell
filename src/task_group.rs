@@ -8,7 +8,8 @@ use core::{
 
 use crate::SharedCell;
 
-/// Spawn a task on a [`TaskGroup`], giving it a [`SharedCell`] handle.
+/// Spawn a task on a [`TaskGroup`], giving it access to a unique reference to a
+/// pinned [`SharedCell`] handle.
 ///
 /// # Example
 ///
@@ -48,7 +49,7 @@ macro_rules! spawn {
     }};
 }
 
-/// A set of tasks that run together on the same thread, with shared data.
+/// A set of tasks that run together on the same thread, with shared data
 ///
 /// Can be used as a building block for concurrent actors, or to share data
 /// between multiple tasks without a mutex or borrow-checking.
@@ -111,8 +112,9 @@ where
     pub async fn cancel(mut self) -> &'a mut T {
         self.tasks.clear();
 
-        // SAFETY: There are no more duplicated instances of `SharedCell`
-        unsafe { self.shared_cell.into_inner() }
+        // This can be done soundly now that there are no more duplicated
+        // instances of `SharedCell`.
+        self.shared_cell.into_inner()
     }
 
     /// Advance all subtasks until completion, returning the inner value.
@@ -121,8 +123,9 @@ where
             drop(self.advance().await);
         }
 
-        // SAFETY: There are no more duplicated instances of `SharedCell`
-        unsafe { self.shared_cell.into_inner() }
+        // This can be done soundly now that there are no more duplicated
+        // instances of `SharedCell`.
+        self.shared_cell.into_inner()
     }
 
     /// Spawn a task on the [`TaskGroup`].

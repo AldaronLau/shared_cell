@@ -4,12 +4,13 @@ All notable changes to `shared_cell` will be documented in this file.
 The format is based on [Keep a Changelog], and this project adheres to
 [Semantic Versioning].
 
-## [0.5.0] - Unreleased
+## [0.5.0] - 2023-08-27
 ### Changed
  - Split out `compile_fail` example for `SharedCell` docs
  - `SharedCell::into_inner()` is no longer unsafe (with additional invariant on
    `SharedCell::duplicate()`)
  - Clarify `SharedCell::into_inner()` docs
+ - Other various docs improvements
 
 ### Fixed
  - Typo in `SharedCell::into_inner()` docs
