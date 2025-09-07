@@ -23,7 +23,7 @@ categories = [
 ]
 keywords = ["cell", "interior", "mutability", "local", "async"]
 readme = "README.md"
-edition = "2021"
+edition = "2024"
 
 [dev-dependencies.async_main]
 version = "0.4"

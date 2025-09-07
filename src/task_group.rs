@@ -18,7 +18,7 @@ use crate::SharedCell;
 /// ```
 #[macro_export]
 macro_rules! spawn {
-    ($tasks: expr, $callback: ident ( $($args: expr),+ $(,)? ) $(,)?) => {{
+    ($tasks: expr_2021, $callback: ident ( $($args: expr_2021),+ $(,)? ) $(,)?) => {{
         let tasks: &mut $crate::TaskGroup<'_, _, _> = &mut $tasks;
 
         let cb = $callback;
@@ -33,7 +33,7 @@ macro_rules! spawn {
         }
     }};
 
-    ($tasks: expr, $callback: ident ( ) $(,)?) => {{
+    ($tasks: expr_2021, $callback: ident ( ) $(,)?) => {{
         let tasks: &mut $crate::TaskGroup<'_, _, _> = &mut $tasks;
 
         let cb = $callback;
@@ -157,7 +157,7 @@ impl<T: ?Sized, R> Future for Tasks<'_, '_, T, R> {
 
         for task in (start..len).chain(0..start) {
             if let Poll::Ready(output) = Pin::new(&mut list[task]).poll(cx) {
-                list.swap_remove(task);
+                drop(list.swap_remove(task));
 
                 return Poll::Ready(output);
             }
